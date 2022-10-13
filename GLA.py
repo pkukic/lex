@@ -8,10 +8,11 @@ INLINE_SEPARATOR = "(&&%%??**)"
 STATE_TRANSITION_SEPARATOR = "(%%%%->%%%%)"
 
 
-def generate_eNKA_tables():
+def generate_eNKA_tables(beginning_state: str):
     working_dir = os.path.join('.', 'analizator')
     working_dir = os.path.join(working_dir, 'tablice')
     with open(os.path.join(working_dir, "akcije.txt"), 'w') as actions:
+        actions.write(beginning_state + LINE_SEPARATOR)
         with open(TARGET, 'r') as file:
             n = 0
             state = ""
@@ -64,9 +65,9 @@ def generate_eNKA_tables():
 def main():
     # read from stdin -> convert to target.lan file
     rp = RegexPrep(TARGET)
-    rp.start()
+    beginning_state = rp.start()
     # read fomr TARGET and generate eNKA definitions in ./analizator/tablice
-    generate_eNKA_tables()
+    generate_eNKA_tables(beginning_state)
 
 if __name__ == '__main__':
     main()
