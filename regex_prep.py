@@ -16,7 +16,7 @@ class RegexPrep:
     
 
     def start(self) -> str:
-        begining_state = ""
+        beginning_state = ""
         with open(self.target, 'w') as wf:
             for line in sys.stdin.readlines():
                 if line.startswith("{") and line != "{\n":
@@ -27,7 +27,7 @@ class RegexPrep:
                     self.prev_regex.update({name[:-1]: processed})
                 elif line.startswith("%X"):
                     parsed = line.split(" ")
-                    begining_state = parsed[1]
+                    beginning_state = parsed[1]
                     continue
                 elif line.startswith("%L"):
                     continue
@@ -43,5 +43,5 @@ class RegexPrep:
                 else:
                     new_line = line
                     wf.write(new_line)
-        return begining_state
+        return beginning_state
                     
