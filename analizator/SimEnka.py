@@ -1,131 +1,199 @@
-from pprint import pformat
+import copy
+import os
+import pprint
 import sys
 
-class Automaton:
-    def __init__(self):
+class Enka:
+
+
+    # initialization
+
+    def __init__(self, input_lines):
         self.rules_dict = {}
-        self.input_strings = []
-        self.input_characters_list = []
-        self.input_characters = []
         self.states = []
         self.characters = []
         self.acceptable_states = []
         self.start_state = ''
-        self.current_states = []
-        self.states_history = []
-        self.output_string = ''
-        self.output_strings_list = []
 
-    def clear_history(self):
         self.current_states = []
-        self.states_history = []
-        self.output_string = ''
+        self.next_character = ''
 
-    def add_to_rules_dict(self, rule):
+        self.__parse(input_lines)
+
+
+    # private methods
+
+    def __clear_data(self):
+        self.current_states = []
+        self.next_character = []
+
+
+    def __add_to_rules_dict(self, rule):
         state_and_input, output = rule.split('->')
         state, input = state_and_input.split(',')
         output_states = output.split(',')
         self.rules_dict[(state, input)] = output_states
         return
 
-    def parse(self, input_lines):
-        input, states, characters, acceptable_states, start_state = input_lines[:5]
-        rules = input_lines[5:]
 
-        self.input_strings = input.split('|')
-        self.input_characters_list = [string.split(',') for string in self.input_strings]
+    def __parse(self, input_lines):
+        states, characters, acceptable_states, start_state = input_lines[:4]
+        rules = input_lines[4:]
+
         self.states = states.split(',')
         self.characters = characters.split(',')
         self.acceptable_states = acceptable_states.split(',')
         self.start_state = start_state
 
         for rule in rules:
-            self.add_to_rules_dict(rule)
+            self.__add_to_rules_dict(rule)
         return
 
-    def get_eps_states(self, states_to_be_evaluated):
+
+    def __get_eps_states(self, states_to_be_evaluated):
         eps_states = []
         for state in states_to_be_evaluated:
             eps_states += self.rules_dict.get((state, '$'), [None])
         return eps_states
 
-    def prune_eps_states(self, eps_states):
+
+    def __prune_eps_states(self, eps_states):
         pruned_states = []
         for state in eps_states:
             if state not in self.current_states and state is not None and state != '#':
                 pruned_states.append(state)
         return list(set(pruned_states))
 
-    def compute_eps_states(self, states_to_be_evaluated):
-        return self.prune_eps_states(self.get_eps_states(states_to_be_evaluated))
 
-    def epsilon_step(self):
+    def __compute_eps_states(self, states_to_be_evaluated):
+        return self.__prune_eps_states(self.__get_eps_states(states_to_be_evaluated))
+
+
+    def __epsilon_step(self):
         states_to_be_evaluated = self.current_states
         while len(states_to_be_evaluated) > 0:
-            computed_states = self.compute_eps_states(states_to_be_evaluated)
+            computed_states = self.__compute_eps_states(states_to_be_evaluated)
             self.current_states += computed_states
             states_to_be_evaluated = computed_states
         return
 
-    def get_transition_states(self, input):
+
+    def __get_transition_states(self, input):
         transition_states = []
         for state in self.current_states:
             transition_states += self.rules_dict.get((state, input), [None])
         return transition_states
 
-    def prune_transition_states(self, transition_states):
+
+    def __prune_transition_states(self, transition_states):
         pruned_states = []
         for state in transition_states:
             if state is not None and state != '#':
                 pruned_states.append(state)
         return list(set(pruned_states))
 
-    def compute_transition_states(self, input):
-        return self.prune_transition_states(self.get_transition_states(input))
 
-    def simulate(self):
+    def __compute_transition_states(self, input):
+        return self.__prune_transition_states(self.__get_transition_states(input))
+
+    
+    def __copy(self):
+        return copy.deepcopy(self)
+
+    def __sim_end_step(self):
+        c = self.__copy()
+        c.__epsilon_step()
+        return c
+
+
+    # public methods
+
+    def restart(self):
+        self.__clear_data()
         self.current_states.append(self.start_state)
-        for input in self.input_characters:
-            self.epsilon_step()
-            self.record_history()
-            transition_states = self.compute_transition_states(input)
-            if len(transition_states) == 0:
-                transition_states = ['#']
-            self.current_states = transition_states
-        self.epsilon_step()
-        self.record_history()
+
+
+    def feed_next_character(self, character):
+        self.next_character = character
+        self.__epsilon_step()
+        transition_states = self.__compute_transition_states(self.next_character)
+        if len(transition_states) == 0:
+            transition_states = ['#']
+        self.current_states = transition_states
         return
 
-    def record_history(self):
-        self.states_history.append(self.current_states)
-        return
 
-    def output_for_input_string(self):
-        return '|'.join([','.join(sorted(state_list)) for state_list in self.states_history])
+    def is_in_acceptable_state(self):
+        end_sim = self.__sim_end_step()
+        return set(end_sim.acceptable_states).intersection(set(end_sim.current_states)) != set()
 
-    def compute(self, input_lines):
-        self.parse(input_lines)
-        for input_characters in self.input_characters_list:
-            self.clear_history()
-            self.input_characters = input_characters
-            self.simulate()
-            self.output_string = self.output_for_input_string()
-            self.output_strings_list.append(self.output_string)
-        return
 
-    def compute_from_string(self, file_as_string):
-        input_lines = file_as_string.split('\n')
-        input_lines = [line for line in input_lines if line != '']
-        self.compute(input_lines)
-        output_string = '\n'.join(self.output_strings_list)
-        output_string += '\n'
-        return output_string
+    def is_in_end_state(self):
+        end_sim = self.__sim_end_step()
+        return end_sim.current_states == ['#']
+
+
+    def string_from_current_states(self):
+        end_sim = self.__sim_end_step()
+        return ','.join(sorted(end_sim.current_states))
+
 
     def __repr__(self):
-        return pformat(vars(self), indent=2, width=120)
+        return pprint.pformat(vars(self), indent=2, width=120)
+
 
 
 if __name__ == '__main__':
-    a = Automaton()
-    input_string = sys.stdin.read()
-    print(a.compute_from_string(input_string), end='')
+    dir = './testni'
+    subdirs = [os.path.abspath(os.path.join(dir, subdir)) for subdir in os.listdir(dir)]
+
+    count = 0
+    for subdir in subdirs:
+        config = os.path.join(subdir, 'test.c')
+        input = os.path.join(subdir, 'test.a')
+        output = os.path.join(subdir, 'test.b')
+
+        with open(config, 'r') as conf_file:
+            input_lines = conf_file.read().splitlines()
+        
+        try:
+            enka = Enka(input_lines)
+            enka.restart()
+            print(enka)
+        except ValueError:
+            print('Error at: ', subdir)
+            sys.exit()
+
+        print(input)
+        with open(input) as input_file:
+            input_first_line = input_file.read().splitlines()[0]
+        input_characters = input_first_line.split(',')
+
+        with open(output) as output_file:
+            output_first_line = output_file.read().splitlines()[0]
+        output_states = output_first_line.split('|')
+        
+        # Ignore the first line, since this is the eps-transition from the start state
+        output_states = output_states[1:]
+
+        assert len(output_states) == len(input_characters)
+
+        out_list = []
+        for i in range(len(input_characters)):
+            char = input_characters[i]
+            enka.feed_next_character(char)
+            out = enka.string_from_current_states()
+            out_list.append(out)
+
+        print('Test:', subdir)
+
+        print('Expected:')
+        pprint.pprint(output_states)
+        
+        print('Computed:')
+        pprint.pprint(out_list)
+
+        assert output_states == out_list
+
+        count += 1
+        print(f"Passed tests: {count}")
