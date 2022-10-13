@@ -17,15 +17,18 @@ class StateMachine:
         self.start_state = -1
         self.end_state = -1
         self.transitions = []
+        self.symbols = set()
         return
     
 
     def new_epsilon_transition(self, left_state: int, right_state: int):
+        self.symbols.add("$")
         self.transitions.append(Transition(left_state, right_state, "$"))
         return
     
 
     def new_transition(self, left_state: int, right_state: int, char: str):
+        self.symbols.add(char)
         self.transitions.append(Transition(left_state, right_state, char))
         return
 
