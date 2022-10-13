@@ -1,6 +1,3 @@
-from ast import Tuple
-
-
 class Transition:
     '''
     Used for storing transitions
@@ -44,7 +41,7 @@ class StateMachine:
 
     def find_right_prnths_index(expression: str) -> int:
         counter = 0
-        for s, i in zip(expression, len(expression)):
+        for s, i in zip(expression, range(0, len(expression))):
             if s == '(' and StateMachine.is_operator(expression, i):
                 counter += 1
             elif s == ')' and counter == 1 and StateMachine.is_operator(expression, i):
@@ -59,7 +56,7 @@ class StateMachine:
         return self.number_of_states - 1
     
 
-    def translate(self, expression: str) -> Tuple[int, int]:
+    def translate(self, expression: str):
         choices = []
         num_of_prnths = 0
         start = 0
@@ -116,6 +113,7 @@ class StateMachine:
                     # case 2
                     if expression[i] == '\\':
                         prefixed = True
+                        i += 1
                         continue
                     
                     if expression[i] != '(':
@@ -129,10 +127,10 @@ class StateMachine:
                     else:
                         # case 2b
                         j = StateMachine.find_right_prnths_index(expression[i:])
-                        left_state_temp, right_state_temp = self.translate(expression[i+1:j])
+                        left_state_temp, right_state_temp = self.translate(expression[i+1:j+i])
                         a = left_state_temp
                         b = right_state_temp
-                        i = j
+                        i = j + i
                 # check for Kleen operator
                 if i+1 < len(expression) and expression[i+1] == '*':
                     x = a
