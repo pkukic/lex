@@ -103,7 +103,7 @@ class Lex:
             print(self.current_pos)
             
             self.__set_active_enkas()
-            print(self.active_enkas)
+            pprint.pprint(self.active_enkas)
             c = self.input_string[self.current_pos]
             print(c)
 
@@ -118,21 +118,24 @@ class Lex:
 
             if all([tup[0].is_in_end_state() for tup in self.active_enkas.values()]):
                 print('here')
-                if self.current_pos != self.length_of_input - 1:
-                    self.current_pos = self.start_of_expression + 1
-                    self.start_of_expression = self.current_pos
-                    self.current_state = self.start_state
-                    self.__set_active_enkas()
+
+                if self.current_pos == self.length_of_input - 1 and all([tup[1] == -inf for tup in self.active_enkas.values()]):
+                    # oporavi se od pogreske
+                    pass
+
                 else:
                     # print(self.output)
                     # print(self.active_enkas.items())
-                    enka_name, (enka, furthest_pos) = max(self.active_enkas.items(), key=lambda tup: tup[1][1])
-                    # print(furthest_pos)
+                    enka_name, (_, furthest_pos) = max(self.active_enkas.items(), key=lambda tup: tup[1][1])
+                    print(enka_name, furthest_pos)
                     lexem = self.input_string[self.start_of_expression:(furthest_pos + 1)]
                     list_of_actions = self.actions_dict[enka_name]
                     self.__do_actions(list_of_actions, lexem)
 
-            self.current_pos += 1
+                    self.start_of_expression = furthest_pos + 1
+                    self.current_pos = self.start_of_expression
+            else:
+                self.current_pos += 1
 
         return
 
