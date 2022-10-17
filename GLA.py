@@ -27,8 +27,6 @@ def generate_eNKA_tables(beginning_state: str, working_dir):
                     state = name + str(n)
 
                     with open(os.path.join(working_dir, state) + ".txt", 'w+') as wf:
-                        # skip first line
-                        wf.write(LINE_SEPARATOR)
                         # write all of the states in a single line
                         for i in range(0, sm.number_of_states):
                             wf.write(str(i))
