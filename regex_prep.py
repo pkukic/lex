@@ -18,16 +18,17 @@ class RegexPrep:
     def start(self) -> str:
         beginning_state = ""
         with open(self.target, 'w') as wf:
-            for line in sys.stdin.readlines():
-                if line.startswith("{") and line != "{\n":
+            lines = sys.stdin.readlines()
+            for line in lines:
+                if len(line.rstrip()) != 1 and line.startswith("{"):
                     # for regex definitions
                     index = line.find(" ")
-                    name, reg = line[:index + 1], line[index + 1:-1] # remove the \n from the end
+                    name, reg = line[:index + 1], (line[index + 1:]).rstrip() # remove the \n from the end (or \r\n)
                     processed = self.change_references_to_regex(reg)
                     self.prev_regex.update({name[:-1]: processed})
                 elif line.startswith("%X"):
                     parsed = line.split(" ")
-                    beginning_state = parsed[1]
+                    beginning_state = (parsed[1]).rstrip()
                     continue
                 elif line.startswith("%L"):
                     continue
@@ -35,7 +36,7 @@ class RegexPrep:
                     # for actions
                     index = line.find(">")
                     new_line = line[0:index + 1]
-                    processed = self.change_references_to_regex(line[index + 1:-1])
+                    processed = self.change_references_to_regex((line[index + 1:]).rstrip())
                     new_line = new_line + processed
                     if not new_line.endswith("\n"):
                         new_line = new_line + "\n"
