@@ -63,7 +63,8 @@ class Lex:
             for line in lines[1:]:
                 state, list_of_actions = line.split(':')
                 list_of_actions = list_of_actions.split(INLINE_SEPARATOR)
-                self.actions_dict[state] = list_of_actions
+                # skip the { }
+                self.actions_dict[state] = list_of_actions[1:-1]
         return
 
     def __set_active_enkas(self):
@@ -74,24 +75,34 @@ class Lex:
             self.active_enkas[state][0].restart()
         return
 
+    def __reset_enkas(self):
+        for state in self.active_enkas:
+            self.active_enkas[state][0].restart()
+            self.active_enkas[state][1] = -inf
+
     def __do_actions(self, list_of_actions, lexem):
         for i, action in enumerate(list_of_actions):
             if i == 0:
                 unif_char = action
                 if unif_char != '-':
-                    self.output.append(unif_char, self.current_row, lexem)
+                    self.output.append((unif_char, self.current_row, lexem))
+                continue
 
             if 'NOVI_REDAK' in action:
                 self.current_row += 1
+                self.__reset_enkas()
+                # ostani u istom stanju, 
+                # pomakni se na sljedeći znak,
+                # resetiraj enka-ove
             elif 'UDJI_U_STANJE' in action:
                 to_enter = action.split(' ')[1]
-                self.current_state = to_enter
+                self.current_state = "<" + to_enter + ">"
                 self.__set_active_enkas()
             elif 'VRATI_SE' in action:
                 to_group = int(action.split(' ')[1])
                 self.current_pos = self.start_of_expression + to_group
                 self.__set_active_enkas()
-        
+                
         return
 
     def compute_from_string(self, input_string):
@@ -99,13 +110,18 @@ class Lex:
         print(self.input_string)
         self.length_of_input = len(input_string)
 
+        self.__set_active_enkas()
+
         while self.current_pos < self.length_of_input:
-            print(self.current_pos)
-            
-            self.__set_active_enkas()
+            print("-----------")
+            print("Before the character, enkas look like: ")
             pprint.pprint(self.active_enkas)
+            print("END OF ENKAS")
+
+
+            print(f"Current position: {self.current_pos}")
             c = self.input_string[self.current_pos]
-            print(c)
+            print(f'Character: |{c}|')
 
             for state in self.active_enkas:
                 # print(state, self.active_enkas[state])
@@ -115,9 +131,13 @@ class Lex:
                 # last matched regex
                 if self.active_enkas[state][0].is_in_acceptable_state():
                     self.active_enkas[state][1] = self.current_pos
+        
+            print("Now enkas look like: ")
+            pprint.pprint(self.active_enkas)
+            print("END OF ENKAS")
 
             if all([tup[0].is_in_end_state() for tup in self.active_enkas.values()]):
-                print('here')
+                print('END OF LEXEME')
 
                 if self.current_pos == self.length_of_input - 1 and all([tup[1] == -inf for tup in self.active_enkas.values()]):
                     # oporavi se od pogreske
@@ -130,6 +150,7 @@ class Lex:
                     print(enka_name, furthest_pos)
                     lexem = self.input_string[self.start_of_expression:(furthest_pos + 1)]
                     list_of_actions = self.actions_dict[enka_name]
+                    print(lexem, list_of_actions)
                     self.__do_actions(list_of_actions, lexem)
 
                     self.start_of_expression = furthest_pos + 1

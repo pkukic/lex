@@ -29,7 +29,7 @@ class Enka:
 
     def __clear_data(self):
         self.current_states = []
-        self.next_character = []
+        self.next_character = ''
 
 
     def __add_to_rules_dict(self, rule):
@@ -130,8 +130,10 @@ class Enka:
         self.__epsilon_step()
         transition_states = self.__compute_transition_states(self.next_character)
         if len(transition_states) == 0:
-            transition_states = ['#']
-        self.current_states = transition_states
+            self.current_states = ['#']
+        else:
+            self.current_states = transition_states
+            self.__epsilon_step()
         return
 
 
