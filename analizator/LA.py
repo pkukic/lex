@@ -2,8 +2,12 @@ from cmath import inf
 import ntpath
 import sys
 import os
+import pprint
+
+sys.path.insert(0,'..')
 
 from SimEnka import Enka
+from GLA import LINE_SEPARATOR, INLINE_SEPARATOR
 
 class Lex:
     def __init__(self, enka_definitions_dir):
@@ -38,7 +42,7 @@ class Lex:
         for fname in abs_fnames:
             if 'akcije' in ntpath.basename(fname):
                 self.actions_fname = fname
-            else:
+            elif ntpath.basename(fname).endswith('.txt') and 'target' not in ntpath.basename(fname):
                 self.enka_definitions_fnames.append(fname)
         return
 
@@ -46,16 +50,18 @@ class Lex:
         for fname in self.enka_definitions_fnames:
             with open(fname, 'r') as definition:
                 enka_name = ntpath.basename(fname).split('.')[0]
-                self.enkas_dict[enka_name] = Enka(definition.read().splitlines())
+                self.enkas_dict[enka_name] = Enka(definition.read().split(LINE_SEPARATOR))
         return
 
     def __load_actions(self):
         with open(self.actions_fname, 'r') as actions_defitions:
-            lines = actions_defitions.read().splitlines()
+            lines = actions_defitions.read().split(LINE_SEPARATOR)
+            lines = [line for line in lines if line != '']
+            # print(lines)
             self.start_state = lines[0]
             for line in lines[1:]:
                 state, list_of_actions = line.split(':')
-                list_of_actions = list_of_actions.split(',')
+                list_of_actions = list_of_actions.split(INLINE_SEPARATOR)
                 self.actions_dict[state] = list_of_actions
         return
 
@@ -110,8 +116,21 @@ class Lex:
                     self.__do_actions(list_of_actions, lexem)
         return
 
+    def __repr__(self):
+        return pprint.pformat(vars(self), indent=2, width=120)
+
+
+def main():
+    dir = '../integration_tests/'
+    dir_names = [os.path.abspath(os.path.join(dir, name))[:-3] for name in os.listdir(dir) if name.endswith('.in')]
+
+    # print(dir_names)
+
+    for dir_name in dir_names:
+        tablice_dir_name = os.path.join(dir_name, 'tablice/')
+        lex = Lex(tablice_dir_name)
+        print(lex)
+        
 
 if __name__ == '__main__':
-    input_string = sys.stdin.read()
-    lex = Lex()
-    print(lex.compute_from_string(input_string), end='')
+    main()

@@ -71,7 +71,7 @@ def main():
             os.mkdir(dir_name)
         
         if not os.path.exists(tablice_dir_name):
-            os.mkdir()
+            os.mkdir(tablice_dir_name)
         
         rp = RegexPrep(os.path.join(tablice_dir_name, 'target.lan'), dir_name + '.lan')
         beginning_state = rp.start()

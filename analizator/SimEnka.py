@@ -3,6 +3,10 @@ import os
 import pprint
 import sys
 
+sys.path.insert(0,'..')
+
+from GLA import LINE_SEPARATOR, INLINE_SEPARATOR, STATE_TRANSITION_SEPARATOR
+
 class Enka:
 
 
@@ -29,21 +33,29 @@ class Enka:
 
 
     def __add_to_rules_dict(self, rule):
-        state_and_input, output = rule.split('->')
-        state, input = state_and_input.split(',')
-        output_states = output.split(',')
+        state_and_input, output = rule.split(STATE_TRANSITION_SEPARATOR)
+        state, input = state_and_input.split(INLINE_SEPARATOR)
+        output_states = output.split(INLINE_SEPARATOR)
         self.rules_dict[(state, input)] = output_states
         return
 
 
     def __parse(self, input_lines):
+        # print(input_lines)
         states, characters, acceptable_states, start_state = input_lines[:4]
         rules = input_lines[4:]
+        rules = [rule for rule in rules if rule != '']
 
-        self.states = states.split(',')
-        self.characters = characters.split(',')
-        self.acceptable_states = acceptable_states.split(',')
+        self.states = states.split(INLINE_SEPARATOR)
+        self.characters = characters.split(INLINE_SEPARATOR)
+        self.acceptable_states = acceptable_states.split(INLINE_SEPARATOR)
         self.start_state = start_state
+
+        # print(self.states)
+        # print(self.characters)
+        # print(self.acceptable_states)
+        # print(self.start_state)
+        # print(rules)
 
         for rule in rules:
             self.__add_to_rules_dict(rule)
