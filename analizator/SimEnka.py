@@ -144,7 +144,7 @@ class Enka:
 
 
 if __name__ == '__main__':
-    dir = './testni'
+    dir = '../enka_tests'
     subdirs = [os.path.abspath(os.path.join(dir, subdir)) for subdir in os.listdir(dir)]
 
     count = 0
