@@ -29,7 +29,7 @@ class RegexPrep:
                         self.prev_regex.update({name[:-1]: processed})
                     elif line.startswith("%X"):
                         parsed = line.split(" ")
-                        beginning_state = parsed[1]
+                        beginning_state = (parsed[1]).rstrip()
                         continue
                     elif line.startswith("%L"):
                         continue
