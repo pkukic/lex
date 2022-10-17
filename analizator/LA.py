@@ -66,6 +66,8 @@ class Lex:
         return
 
     def __set_active_enkas(self):
+        # print(self.current_state)
+        # print(self.enkas_dict)
         self.active_enkas = {k:(v, -inf) for (k, v) in self.enkas_dict.items() if k.startswith(self.current_state)}
         return
 
@@ -91,11 +93,13 @@ class Lex:
 
     def compute_from_string(self, input_string):
         self.input_string = input_string
+        print(self.input_string)
         self.length_of_input = len(input_string)
 
         while self.current_pos < self.length_of_input:
             
             self.__set_active_enkas()
+            # print(self.active_enkas)
             c = self.input_string[self.current_pos]
 
             for state in self.active_enkas:
@@ -103,14 +107,17 @@ class Lex:
                 if self.active_enkas[state][0].is_in_acceptable_state():
                     self.active_enkas[state][1] = self.current_pos
 
-            if all(self.active_enkas.values(), lambda tup: tup[0].is_in_end_state()):
+            if all(list(filter(lambda tup: tup[0].is_in_end_state(), self.active_enkas.values()))):
                 if self.current_pos != self.length_of_input - 1:
                     self.current_pos = self.start_of_expression + 1
                     self.start_of_expression = self.current_pos
                     self.current_state = self.start_state
                     self.__set_active_enkas()
                 else:
-                    enka_name, (enka, furthest_pos) = max(self.active_enkas.items(), lambda tup: tup[1][1])
+                    # print(self.output)
+                    # print(self.active_enkas.items())
+                    enka_name, (enka, furthest_pos) = max(self.active_enkas.items(), key=lambda tup: tup[1][1])
+                    print(furthest_pos)
                     lexem = self.input_string[self.start_of_expression:(furthest_pos + 1)]
                     list_of_actions = self.actions_dict[enka_name]
                     self.__do_actions(list_of_actions, lexem)
@@ -130,7 +137,9 @@ def main():
         tablice_dir_name = os.path.join(dir_name, 'tablice/')
         lex = Lex(tablice_dir_name)
         print(lex)
-        
+        with open(dir_name + '.in') as input:
+            lex.compute_from_string(input.read())
+        print(lex)
 
 if __name__ == '__main__':
     main()

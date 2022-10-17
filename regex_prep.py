@@ -45,5 +45,4 @@ class RegexPrep:
                     else:
                         new_line = line
                         wf.write(new_line)
-        return beginning_state
-                    
+        return ("<" + beginning_state + ">")
