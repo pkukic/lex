@@ -151,7 +151,7 @@ class Enka:
 
 
     def __repr__(self):
-        return pprint.pformat(vars(self), indent=2, width=120)
+        return pprint.pformat({k:v for (k, v) in vars(self).items() if k == 'current_states' or k == 'next_character'}, indent=2, width=120, compact=True)
 
 
 

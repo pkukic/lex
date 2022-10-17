@@ -1,4 +1,5 @@
 from cmath import inf
+from multiprocessing.dummy import active_children
 import ntpath
 import sys
 import os
@@ -69,6 +70,8 @@ class Lex:
         # print(self.current_state)
         # print(self.enkas_dict)
         self.active_enkas = {k:(v, -inf) for (k, v) in self.enkas_dict.items() if k.startswith(self.current_state)}
+        for state in self.active_enkas:
+            self.active_enkas[state][0].restart()
         return
 
     def __do_actions(self, list_of_actions, lexem):
@@ -97,17 +100,21 @@ class Lex:
         self.length_of_input = len(input_string)
 
         while self.current_pos < self.length_of_input:
+            print(self.current_pos)
             
             self.__set_active_enkas()
-            # print(self.active_enkas)
+            print(self.active_enkas)
             c = self.input_string[self.current_pos]
+            print(c)
 
             for state in self.active_enkas:
+                print(state, self.active_enkas[state])
                 self.active_enkas[state][0].feed_next_character(c)
                 if self.active_enkas[state][0].is_in_acceptable_state():
                     self.active_enkas[state][1] = self.current_pos
 
             if all(list(filter(lambda tup: tup[0].is_in_end_state(), self.active_enkas.values()))):
+                print('here')
                 if self.current_pos != self.length_of_input - 1:
                     self.current_pos = self.start_of_expression + 1
                     self.start_of_expression = self.current_pos
@@ -124,7 +131,7 @@ class Lex:
         return
 
     def __repr__(self):
-        return pprint.pformat(vars(self), indent=2, width=120)
+        return pprint.pformat(vars(self), indent=2, width=120, compact=True)
 
 
 def main():

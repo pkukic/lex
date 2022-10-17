@@ -41,10 +41,11 @@ def generate_eNKA_tables(beginning_state: str, working_dir):
                                 wf.write(INLINE_SEPARATOR)
                             else:
                                 wf.write(LINE_SEPARATOR)
-                        # write the begining state in new line
-                        wf.write(str(sm.start_state) + LINE_SEPARATOR)
+
                         # write the end (acceptable) state in new line
                         wf.write(str(sm.end_state) + LINE_SEPARATOR)
+                        # write the begining state in new line
+                        wf.write(str(sm.start_state) + LINE_SEPARATOR)
 
                         # write all of the transitions
                         for transition in sm.transitions:
