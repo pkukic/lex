@@ -1,5 +1,4 @@
 from cmath import inf
-from multiprocessing.dummy import active_children
 import ntpath
 import sys
 import os
@@ -52,6 +51,7 @@ class Lex:
             with open(fname, 'r') as definition:
                 enka_name = ntpath.basename(fname).split('.')[0]
                 self.enkas_dict[enka_name] = Enka(definition.read().split(LINE_SEPARATOR))
+                print('Loaded:', enka_name, self.enkas_dict[enka_name])
         return
 
     def __load_actions(self):
@@ -69,7 +69,7 @@ class Lex:
     def __set_active_enkas(self):
         # print(self.current_state)
         # print(self.enkas_dict)
-        self.active_enkas = {k:(v, -inf) for (k, v) in self.enkas_dict.items() if k.startswith(self.current_state)}
+        self.active_enkas = {k:[v, -inf] for (k, v) in self.enkas_dict.items() if k.startswith(self.current_state)}
         for state in self.active_enkas:
             self.active_enkas[state][0].restart()
         return
@@ -108,12 +108,15 @@ class Lex:
             print(c)
 
             for state in self.active_enkas:
-                print(state, self.active_enkas[state])
+                # print(state, self.active_enkas[state])
                 self.active_enkas[state][0].feed_next_character(c)
+                # print(state, self.active_enkas[state])
+
+                # last matched regex
                 if self.active_enkas[state][0].is_in_acceptable_state():
                     self.active_enkas[state][1] = self.current_pos
 
-            if all(list(filter(lambda tup: tup[0].is_in_end_state(), self.active_enkas.values()))):
+            if all([tup[0].is_in_end_state() for tup in self.active_enkas.values()]):
                 print('here')
                 if self.current_pos != self.length_of_input - 1:
                     self.current_pos = self.start_of_expression + 1
@@ -124,10 +127,13 @@ class Lex:
                     # print(self.output)
                     # print(self.active_enkas.items())
                     enka_name, (enka, furthest_pos) = max(self.active_enkas.items(), key=lambda tup: tup[1][1])
-                    print(furthest_pos)
+                    # print(furthest_pos)
                     lexem = self.input_string[self.start_of_expression:(furthest_pos + 1)]
                     list_of_actions = self.actions_dict[enka_name]
                     self.__do_actions(list_of_actions, lexem)
+
+            self.current_pos += 1
+
         return
 
     def __repr__(self):
@@ -147,6 +153,7 @@ def main():
         with open(dir_name + '.in') as input:
             lex.compute_from_string(input.read())
         print(lex)
+        print("----------------------")
 
 if __name__ == '__main__':
     main()
