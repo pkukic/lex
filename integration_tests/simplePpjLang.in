@@ -24,7 +24,7 @@ int main(void) {
     
     tmp[1] = 'b';
     tmp[2] = '\n';
-    tmp[3] = '''; // leksicka greska
+    tmp[3] = ''; // leksicka greska
     tmp[0] = '\'';
     for (i=0; i<4; ++i) {
         tmp[i] = (char)abc; /* komentar *

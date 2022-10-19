@@ -1,3 +1,4 @@
+from cmath import inf
 import copy
 import os
 import pprint
@@ -5,14 +6,13 @@ import sys
 
 sys.path.insert(0,'..')
 
-from GLA import LINE_SEPARATOR, INLINE_SEPARATOR, STATE_TRANSITION_SEPARATOR
+import GLA
 
 class Enka:
 
-
     # initialization
 
-    def __init__(self, input_lines):
+    def __init__(self, input_lines, current_pos, testing=False):
         self.rules_dict = {}
         self.states = []
         self.characters = []
@@ -22,43 +22,57 @@ class Enka:
         self.current_states = []
         self.next_character = ''
 
+        self.current_pos = current_pos
+        self.furthest_pos = -inf
+        self.testing = testing
+
+        if self.testing:
+            self.LINE_SEPARATOR = '\n'
+            self.INLINE_SEPARATOR = ','
+            self.STATE_TRANSITION_SEPARATOR = '->'
+        else:
+            self.LINE_SEPARATOR = GLA.LINE_SEPARATOR
+            self.INLINE_SEPARATOR = GLA.INLINE_SEPARATOR
+            self.STATE_TRANSITION_SEPARATOR = GLA.STATE_TRANSITION_SEPARATOR
+
         self.__parse(input_lines)
+        
+        if not self.testing:
+            self.__epsilon_step()
 
 
     # private methods
 
     def __clear_data(self):
-        self.current_states = []
+        self.current_states = [self.start_state]
         self.next_character = ''
+        self.furthest_pos = -inf
 
 
     def __add_to_rules_dict(self, rule):
-        state_and_input, output = rule.split(STATE_TRANSITION_SEPARATOR)
-        state, input = state_and_input.split(INLINE_SEPARATOR)
-        output_states = output.split(INLINE_SEPARATOR)
-        self.rules_dict[(state, input)] = output_states
+        state_and_input, output = rule.split(self.STATE_TRANSITION_SEPARATOR)
+        state, input = state_and_input.split(self.INLINE_SEPARATOR)
+        output_states = output.split(self.INLINE_SEPARATOR)
+        if (state, input) in self.rules_dict:
+            self.rules_dict[(state, input)].extend(output_states)
+        else:
+            self.rules_dict[(state, input)] = output_states
         return
 
 
     def __parse(self, input_lines):
-        # print(input_lines)
         states, characters, acceptable_states, start_state = input_lines[:4]
         rules = input_lines[4:]
         rules = [rule for rule in rules if rule != '']
 
-        self.states = states.split(INLINE_SEPARATOR)
-        self.characters = characters.split(INLINE_SEPARATOR)
-        self.acceptable_states = acceptable_states.split(INLINE_SEPARATOR)
+        self.states = states.split(self.INLINE_SEPARATOR)
+        self.characters = characters.split(self.INLINE_SEPARATOR)
+        self.acceptable_states = acceptable_states.split(self.INLINE_SEPARATOR)
         self.start_state = start_state
-
-        # print(self.states)
-        # print(self.characters)
-        # print(self.acceptable_states)
-        # print(self.start_state)
-        # print(rules)
 
         for rule in rules:
             self.__add_to_rules_dict(rule)
+
         return
 
 
@@ -82,11 +96,16 @@ class Enka:
 
 
     def __epsilon_step(self):
+        if self.current_states == ['#']:
+            return
+
         states_to_be_evaluated = self.current_states
         while len(states_to_be_evaluated) > 0:
             computed_states = self.__compute_eps_states(states_to_be_evaluated)
             self.current_states += computed_states
             states_to_be_evaluated = computed_states
+            if self.is_in_acceptable_state():
+                self.furthest_pos = self.current_pos
         return
 
 
@@ -120,29 +139,36 @@ class Enka:
 
     # public methods
 
-    def restart(self):
+    def restart_from_pos(self, pos):
         self.__clear_data()
-        self.current_states.append(self.start_state)
+        if not self.testing:
+            self.__epsilon_step()
+        self.current_pos = pos
 
 
     def feed_next_character(self, character):
         self.next_character = character
-        self.__epsilon_step()
+        if self.testing:
+            self.__epsilon_step()
+
         transition_states = self.__compute_transition_states(self.next_character)
+        
         if len(transition_states) == 0:
             self.current_states = ['#']
         else:
             self.current_states = transition_states
             self.__epsilon_step()
+
+        self.current_pos += 1
+
         return
 
 
     def is_in_acceptable_state(self):
-        end_sim = self.__sim_end_step()
-        return set(end_sim.acceptable_states).intersection(set(end_sim.current_states)) != set()
+        return set(self.acceptable_states).intersection(set(self.current_states)) != set()
 
 
-    def is_in_end_state(self):
+    def has_terminated(self):
         end_sim = self.__sim_end_step()
         return end_sim.current_states == ['#']
 
@@ -151,9 +177,21 @@ class Enka:
         end_sim = self.__sim_end_step()
         return ','.join(sorted(end_sim.current_states))
 
+    def get_current_pos(self):
+        return self.current_pos
+
+    def set_current_pos(self, current_pos):
+        self.current_pos = current_pos
+
+    def get_furthest_pos(self):
+        return self.furthest_pos
+
+    def set_furthest_pos(self, furthest_pos):
+        self.furthest_pos = furthest_pos
+
 
     def __repr__(self):
-        return pprint.pformat({k:v for (k, v) in vars(self).items() if k == 'current_states' or k == 'next_character'}, indent=2, width=120, compact=True)
+        return pprint.pformat({k:v for (k, v) in vars(self).items()}, indent=2, width=200, compact=True)
 
 
 
@@ -170,13 +208,9 @@ if __name__ == '__main__':
         with open(config, 'r') as conf_file:
             input_lines = conf_file.read().splitlines()
         
-        try:
-            enka = Enka(input_lines)
-            enka.restart()
-            print(enka)
-        except ValueError:
-            print('Error at: ', subdir)
-            sys.exit()
+        enka = Enka(input_lines, 0, testing=True)
+        enka.restart_from_pos(0)
+        print(enka)
 
         print(input)
         with open(input) as input_file:
