@@ -104,7 +104,7 @@ class StateMachine:
                         char = '\t'
                     elif expression[i] == 'n':
                         char = '\n'
-                    elif expression[i] == ' ':
+                    elif expression[i] == '_':
                         char = ' '
                     else:
                         char = expression[i]

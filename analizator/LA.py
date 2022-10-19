@@ -178,6 +178,9 @@ class Lex:
                 self.current_pos += 1
 
         return
+
+    def output_as_string(self):
+        return '\n'.join([tup[0] + ' ' + str(tup[1]) + ' ' + tup[2] for tup in self.output]) + '\n'
     
     # def __set_active_enkas(self):
     #     # print(self.current_state)
@@ -296,11 +299,19 @@ def main():
     for dir_name in dir_names:
         tablice_dir_name = os.path.join(dir_name, 'tablice/')
         lex = Lex(tablice_dir_name)
-        # print(lex)
-        with open(dir_name + '.in') as input:
-            lex.compute_from_string(input.read())
-        print(lex)
+        computed = ''
+        output = ''
+        with open(dir_name + '.in') as input_file:
+            lex.compute_from_string(input_file.read())
+            computed = lex.output_as_string()
+        print(computed)
         print("----------------------")
+        with open(dir_name + '.out') as output_file:
+            output = output_file.read()
+        print(output)
+        print("----------------------")
+
+        assert output == computed
 
 if __name__ == '__main__':
     main()
