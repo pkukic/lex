@@ -2,9 +2,10 @@ import sys
 
 class RegexPrep:
     
-    def __init__(self, target: str):
+    def __init__(self, target: str, input_file):
         self.target = target
         self.prev_regex = {}
+        self.input_file = input_file
         return
     
 

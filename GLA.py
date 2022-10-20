@@ -2,18 +2,16 @@ from state_machine import StateMachine, Transition
 from regex_prep import RegexPrep
 import os
 
-TARGET = "target.lan"
 LINE_SEPARATOR = "(###&&&???%%%***)\n"
 INLINE_SEPARATOR = "(&&%%??**)"
 STATE_TRANSITION_SEPARATOR = "(%%%%->%%%%)"
 
 
-def generate_eNKA_tables(beginning_state: str):
-    working_dir = os.path.join('.', 'analizator')
-    working_dir = os.path.join(working_dir, 'tablice')
-    with open(os.path.join(working_dir, "akcije.txt"), 'w') as actions:
+def generate_eNKA_tables(beginning_state: str, working_dir):
+    print(working_dir)
+    with open(os.path.join(working_dir, "akcije.txt"), 'w+') as actions:
         actions.write(beginning_state + LINE_SEPARATOR)
-        with open(TARGET, 'r') as file:
+        with open(os.path.join(working_dir, "target.lan"), 'r') as file:
             n = 0
             state = ""
             for line in file.readlines():
@@ -28,9 +26,7 @@ def generate_eNKA_tables(beginning_state: str):
                     sm.end_state = end_state
                     state = name + str(n)
 
-                    with open(os.path.join(working_dir, state) + ".txt", 'w') as wf:
-                        # skip first line
-                        wf.write(LINE_SEPARATOR)
+                    with open(os.path.join(working_dir, state) + ".txt", 'w+') as wf:
                         # write all of the states in a single line
                         for i in range(0, sm.number_of_states):
                             wf.write(str(i))
@@ -45,10 +41,11 @@ def generate_eNKA_tables(beginning_state: str):
                                 wf.write(INLINE_SEPARATOR)
                             else:
                                 wf.write(LINE_SEPARATOR)
-                        # write the begining state in new line
-                        wf.write(str(sm.start_state) + LINE_SEPARATOR)
+
                         # write the end (acceptable) state in new line
                         wf.write(str(sm.end_state) + LINE_SEPARATOR)
+                        # write the begining state in new line
+                        wf.write(str(sm.start_state) + LINE_SEPARATOR)
 
                         # write all of the transitions
                         for transition in sm.transitions:
@@ -61,13 +58,26 @@ def generate_eNKA_tables(beginning_state: str):
                 else:
                     actions.write(line[:-1] + INLINE_SEPARATOR)
 
-
 def main():
-    # read from stdin -> convert to target.lan file
-    rp = RegexPrep(TARGET)
-    beginning_state = rp.start()
-    # read fomr TARGET and generate eNKA definitions in ./analizator/tablice
-    generate_eNKA_tables(beginning_state)
+    dir = './integration_tests/'
+    dir_names = [os.path.abspath(os.path.join(dir, name))[:-3] for name in os.listdir(dir) if name.endswith('.in')]
+
+    # print(dir_names)
+
+    for dir_name in dir_names:
+
+        tablice_dir_name = os.path.join(dir_name, 'tablice/')
+
+        if not os.path.exists(dir_name):
+            os.mkdir(dir_name)
+        
+        if not os.path.exists(tablice_dir_name):
+            os.mkdir(tablice_dir_name)
+        
+        rp = RegexPrep(os.path.join(tablice_dir_name, 'target.lan'), dir_name + '.lan')
+        beginning_state = rp.start()
+        generate_eNKA_tables(beginning_state, tablice_dir_name)
+
 
 if __name__ == '__main__':
     main()

@@ -1,0 +1,75 @@
+<S_pocetno>\t|\_
+{
+-
+}
+<S_pocetno>\n
+{
+-
+NOVI_REDAK
+}
+<S_pocetno>#\|
+{
+-
+UDJI_U_STANJE S_komentar
+}
+<S_komentar>\|#
+{
+-
+UDJI_U_STANJE S_pocetno
+}
+<S_komentar>\n
+{
+-
+NOVI_REDAK
+}
+<S_komentar>(\(|\)|\{|\}|\||\*|\\|\$|\t|\n|\_|!|"|#|%|&|'|+|,|-|.|/|0|1|2|3|4|5|6|7|8|9|:|;|<|=|>|?|@|A|B|C|D|E|F|G|H|I|J|K|L|M|N|O|P|Q|R|S|T|U|V|W|X|Y|Z|[|]|^|_|`|a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|~)
+{
+-
+}
+<S_pocetno>((0|1|2|3|4|5|6|7|8|9)(0|1|2|3|4|5|6|7|8|9)*|0x((0|1|2|3|4|5|6|7|8|9)|a|b|c|d|e|f|A|B|C|D|E|F)((0|1|2|3|4|5|6|7|8|9)|a|b|c|d|e|f|A|B|C|D|E|F)*)
+{
+OPERAND
+}
+<S_pocetno>\(
+{
+LIJEVA_ZAGRADA
+}
+<S_pocetno>\)
+{
+DESNA_ZAGRADA
+}
+<S_pocetno>-
+{
+OP_MINUS
+}
+<S_pocetno>-(\t|\n|\_)*-
+{
+OP_MINUS
+UDJI_U_STANJE S_unarni
+VRATI_SE 1
+}
+<S_pocetno>\((\t|\n|\_)*-
+{
+LIJEVA_ZAGRADA
+UDJI_U_STANJE S_unarni
+VRATI_SE 1
+}
+<S_unarni>\t|\_
+{
+-
+}
+<S_unarni>\n
+{
+-
+NOVI_REDAK
+}
+<S_unarni>-
+{
+UMINUS
+UDJI_U_STANJE S_pocetno
+}
+<S_unarni>-(\t|\n|\_)*-
+{
+UMINUS
+VRATI_SE 1
+}
