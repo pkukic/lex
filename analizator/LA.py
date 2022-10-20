@@ -156,7 +156,7 @@ class Lex:
         self.length_of_input = len(self.input_string)
         self.__enter_state_at_pos(self.start_state, 0)
 
-        print(self.input_string[20:28])
+        # print(self.input_string[20:28])
 
         while self.current_pos < self.length_of_input:
             c = input_string[self.current_pos]
@@ -174,6 +174,13 @@ class Lex:
             if self.__check_if_all_enkas_terminated():
                 enka_name, enka = self.__pick_highest_priority_enka()
                 print(f"Enka {enka_name} terminated at |Pos: {self.current_pos}, Char: {c}|")
+                furthest_pos = enka.get_furthest_pos()
+                if furthest_pos == -inf:
+                    self.current_pos += 1
+                    self.start_of_expression = self.current_pos
+                    self.end_of_expression = inf
+                    self.__restart_enkas_from_pos(self.current_pos)
+                    continue
                 self.end_of_expression = enka.get_furthest_pos() + 1
                 self.__do_actions(enka_name)
             else:
@@ -297,10 +304,10 @@ def main():
     dir = '../integration_tests/'
     dir_names = [os.path.abspath(os.path.join(dir, name))[:-3] for name in os.listdir(dir) if name.endswith('.in')]
 
-    dir_names = [name for name in dir_names if 'nadji_a1' in name]
+    dir_names = [name for name in dir_names if 'svaki_drugi_a2' in name]
 
-    # Working: minusLang
-    # Not working: nadji_a1, nadji_a2, simplePpjLang, svaki_drugi_a1, svaki_drugi_a2
+    # Working: minusLang, nadji_a1, nadji_a2, svaki_drugi_a1, svaki_drugi_a2
+    # Not working: simplePpjLang
 
     for dir_name in dir_names:
         tablice_dir_name = os.path.join(dir_name, 'tablice/')

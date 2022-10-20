@@ -47,6 +47,7 @@ class Enka:
         self.current_states = [self.start_state]
         self.next_character = ''
         self.furthest_pos = -inf
+        self.current_pos = 0
 
 
     def __add_to_rules_dict(self, rule):
