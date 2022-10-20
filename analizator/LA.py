@@ -297,7 +297,10 @@ def main():
     dir = '../integration_tests/'
     dir_names = [os.path.abspath(os.path.join(dir, name))[:-3] for name in os.listdir(dir) if name.endswith('.in')]
 
-    dir_names = [name for name in dir_names if 'simplePpjLang' in name]
+    dir_names = [name for name in dir_names if 'nadji_a1' in name]
+
+    # Working: minusLang
+    # Not working: nadji_a1, nadji_a2, simplePpjLang, svaki_drugi_a1, svaki_drugi_a2
 
     for dir_name in dir_names:
         tablice_dir_name = os.path.join(dir_name, 'tablice/')
