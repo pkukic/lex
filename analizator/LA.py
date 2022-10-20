@@ -36,6 +36,7 @@ class Lex:
         self.current_row = 1
 
         self.active_enkas = {}
+        self.end_of_lexeme = 0
 
         self.output = []
 
@@ -128,6 +129,7 @@ class Lex:
         self.start_of_expression = self.end_of_expression
         self.end_of_expression = inf
         self.current_pos = self.start_of_expression
+        self.end_of_lexeme = self.current_pos
 
         return
 
@@ -156,27 +158,17 @@ class Lex:
         self.length_of_input = len(self.input_string)
         self.__enter_state_at_pos(self.start_state, 0)
 
-        # print(self.input_string[20:28])
-
         while self.current_pos < self.length_of_input:
             c = input_string[self.current_pos]
-            print("-----------")
-            print(f"|Pos: {self.current_pos}, Char: {c}|")
-            # try:
-            #     c = input_string[self.current_pos]
-            # except TypeError:
-            #     print('a')
-            #     print(self.current_pos)
-            #     print(self.input_string)
-            #     sys.exit()
-            
             self.__feed_character_to_active_enkas(c)
+            if self.current_pos % 100 == 0:
+                print(self.current_pos, c)
             if self.__check_if_all_enkas_terminated():
                 enka_name, enka = self.__pick_highest_priority_enka()
-                print(f"Enka {enka_name} terminated at |Pos: {self.current_pos}, Char: {c}|")
                 furthest_pos = enka.get_furthest_pos()
                 if furthest_pos == -inf:
-                    self.current_pos += 1
+                    self.current_pos = self.end_of_lexeme + 1
+                    self.end_of_lexeme += 1
                     self.start_of_expression = self.current_pos
                     self.end_of_expression = inf
                     self.__restart_enkas_from_pos(self.current_pos)
@@ -185,116 +177,10 @@ class Lex:
                 self.__do_actions(enka_name)
             else:
                 self.current_pos += 1
-            print("-----------")
-
         return
 
     def output_as_string(self):
         return '\n'.join([tup[0] + ' ' + str(tup[1]) + ' ' + tup[2] for tup in self.output]) + '\n'
-    
-    # def __set_active_enkas(self):
-    #     # print(self.current_state)
-    #     # print(self.enkas_dict)
-    #     self.active_enkas = {k:v for (k, v) in self.enkas_dict.items() if k.startswith(self.current_state)}
-    #     for state in self.active_enkas:
-    #         self.active_enkas[state].restart()
-    #         self.active_enkas[state].set_current_pos(self.current_pos)
-
-    #     return
-
-    # def __reset_enkas(self):
-    #     for state in self.active_enkas:
-    #         self.active_enkas[state].restart()
-    #         self.active_enkas[state].set_current_pos(self.current_pos)
-    #         self.active_enkas[state].set_furthest_pos(-inf)
-
-
-    # def __do_actions(self, list_of_actions, lexem, furthest_pos):
-    #     for i, action in enumerate(list_of_actions):
-    #         if i == 0:
-    #             unif_char = action
-    #             if unif_char != '-':
-    #                 self.output.append((unif_char, self.current_row, lexem))
-    #             elif len(list_of_actions) == 1:
-    #                 self.start_of_expression = furthest_pos + 1
-    #                 self.current_pos = self.start_of_expression
-    #                 self.__reset_enkas()
-
-    #         if 'NOVI_REDAK' in action:
-    #             self.current_row += 1
-    #             self.start_of_expression = furthest_pos + 1
-    #             self.current_pos = self.start_of_expression
-    #             self.__reset_enkas()
-    #             # ostani u istom stanju, 
-    #             # pomakni se na sljedeći znak,
-    #             # resetiraj enka-ove
-    #         elif 'UDJI_U_STANJE' in action:
-    #             self.start_of_expression = furthest_pos + 1
-    #             self.current_pos = self.start_of_expression
-    #             to_enter = action.split(' ')[1]
-    #             self.current_state = "<" + to_enter + ">"
-    #             self.__set_active_enkas()
-    #         elif 'VRATI_SE' in action:
-    #             to_group = int(action.split(' ')[1])
-    #             self.current_pos = self.start_of_expression + to_group
-    #             self.__set_active_enkas()
-                
-    #     return
-
-    # def compute_from_string(self, input_string):
-    #     self.input_string = input_string
-    #     # print(self.input_string)
-    #     self.length_of_input = len(input_string)
-
-    #     self.__set_active_enkas()
-
-    #     while self.current_pos < self.length_of_input:
-    #         # print("-----------")
-    #         # print("Before the character, enkas look like: ")
-    #         # pprint.pprint(self.active_enkas)
-    #         # print("END OF ENKAS")
-
-
-    #         # print(f"Current position: {self.current_pos}")
-    #         c = self.input_string[self.current_pos]
-    #         # print(f'Character: |{c}|')
-
-    #         for state in self.active_enkas:
-    #             # print(state, self.active_enkas[state])
-    #             self.active_enkas[state].feed_next_character(c)
-    #             # print(state, self.active_enkas[state])
-
-    #             # last matched regex
-    #             # if self.active_enkas[state][0].is_in_acceptable_state():
-    #             #     self.active_enkas[state][1] = self.current_pos
-        
-    #         # print("Now enkas look like: ")
-    #         # pprint.pprint(self.active_enkas)
-    #         # print("END OF ENKAS")
-
-    #         if all([enka.is_in_end_state() for enka in self.active_enkas.values()]):
-    #             # print('END OF LEXEME')
-
-    #             if self.current_pos == self.length_of_input - 1 and all([enka.get_furthest_pos() == -inf for enka in self.active_enkas.values()]):
-    #                 # oporavi se od pogreske
-    #                 pass
-
-    #             else:
-    #                 # print(self.output)
-    #                 # print(self.active_enkas.items())
-    #                 enka_name, _ = max(self.active_enkas.items(), key=lambda tup: tup[1].get_furthest_pos())
-    #                 furthest_pos = self.active_enkas[enka_name].get_furthest_pos()
-    #                 # print(enka_name, furthest_pos)
-    #                 lexem = self.input_string[self.start_of_expression:(furthest_pos + 1)]
-    #                 list_of_actions = self.actions_dict[enka_name]
-    #                 # print(lexem, list_of_actions)
-
-    #                 self.__do_actions(list_of_actions, lexem, furthest_pos)
-
-    #         else:
-    #             self.current_pos += 1
-
-    #     return
 
     def __repr__(self):
         return pprint.pformat(vars(self), indent=2, width=200, compact=True)
@@ -304,12 +190,8 @@ def main():
     dir = '../integration_tests/'
     dir_names = [os.path.abspath(os.path.join(dir, name))[:-3] for name in os.listdir(dir) if name.endswith('.in')]
 
-    dir_names = [name for name in dir_names if 'svaki_drugi_a2' in name]
-
-    # Working: minusLang, nadji_a1, nadji_a2, svaki_drugi_a1, svaki_drugi_a2
-    # Not working: simplePpjLang
-
-    for dir_name in dir_names:
+    for i, dir_name in enumerate(dir_names):
+        print(dir_name)
         tablice_dir_name = os.path.join(dir_name, 'tablice/')
         lex = Lex(tablice_dir_name)
         computed = ''
@@ -325,6 +207,8 @@ def main():
         print("----------------------")
 
         assert output == computed
+
+        print(f"Passed tests: {i}")
 
 if __name__ == '__main__':
     main()
