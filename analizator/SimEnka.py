@@ -255,7 +255,8 @@ def test_simplePpj():
     enka.restart_from_pos(0)
     enka.feed_next_character("'")
     enka.feed_next_character("'")
+    print(enka)
     return
  
 if __name__ == '__main__':
-    test_simplePpj()
+    test_enka_tests()

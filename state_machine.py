@@ -106,6 +106,8 @@ class StateMachine:
                         char = '\n'
                     elif expression[i] == '_':
                         char = ' '
+                    elif expression[i] == '$':
+                        char = '\$'
                     else:
                         char = expression[i]
                     
