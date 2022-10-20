@@ -159,8 +159,9 @@ class Lex:
         print(self.input_string[20:28])
 
         while self.current_pos < self.length_of_input:
-            print(self.current_pos)
             c = input_string[self.current_pos]
+            print("-----------")
+            print(f"|Pos: {self.current_pos}, Char: {c}|")
             # try:
             #     c = input_string[self.current_pos]
             # except TypeError:
@@ -172,10 +173,12 @@ class Lex:
             self.__feed_character_to_active_enkas(c)
             if self.__check_if_all_enkas_terminated():
                 enka_name, enka = self.__pick_highest_priority_enka()
+                print(f"Enka {enka_name} terminated at |Pos: {self.current_pos}, Char: {c}|")
                 self.end_of_expression = enka.get_furthest_pos() + 1
                 self.__do_actions(enka_name)
             else:
                 self.current_pos += 1
+            print("-----------")
 
         return
 

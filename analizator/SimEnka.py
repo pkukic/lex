@@ -193,9 +193,7 @@ class Enka:
     def __repr__(self):
         return pprint.pformat({k:v for (k, v) in vars(self).items()}, indent=2, width=200, compact=True)
 
-
-
-if __name__ == '__main__':
+def test_enka_tests():
     dir = '../enka_tests'
     subdirs = [os.path.abspath(os.path.join(dir, subdir)) for subdir in os.listdir(dir)]
 
@@ -245,3 +243,18 @@ if __name__ == '__main__':
 
         count += 1
         print(f"Passed tests: {count}")
+
+
+def test_simplePpj():
+    fname = '../integration_tests/simplePpjLang/tablice/<S_pocetno>25.txt'
+    with open(fname, 'r') as config:
+        input_lines = config.read()
+
+    enka = Enka(input_lines.split(GLA.LINE_SEPARATOR), 0)
+    enka.restart_from_pos(0)
+    enka.feed_next_character("'")
+    enka.feed_next_character("'")
+    return
+
+if __name__ == '__main__':
+    test_simplePpj()
