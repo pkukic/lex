@@ -256,6 +256,6 @@ def test_simplePpj():
     enka.feed_next_character("'")
     enka.feed_next_character("'")
     return
-
+ 
 if __name__ == '__main__':
     test_simplePpj()
