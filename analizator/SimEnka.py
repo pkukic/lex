@@ -6,7 +6,7 @@ import sys
 
 sys.path.insert(0,'..')
 
-import GLA
+import constants
 
 class Enka:
 
@@ -31,9 +31,9 @@ class Enka:
             self.INLINE_SEPARATOR = ','
             self.STATE_TRANSITION_SEPARATOR = '->'
         else:
-            self.LINE_SEPARATOR = GLA.LINE_SEPARATOR
-            self.INLINE_SEPARATOR = GLA.INLINE_SEPARATOR
-            self.STATE_TRANSITION_SEPARATOR = GLA.STATE_TRANSITION_SEPARATOR
+            self.LINE_SEPARATOR = constants.LINE_SEPARATOR
+            self.INLINE_SEPARATOR = constants.INLINE_SEPARATOR
+            self.STATE_TRANSITION_SEPARATOR = constants.STATE_TRANSITION_SEPARATOR
 
         self.__parse(input_lines)
         
@@ -251,7 +251,7 @@ def test_simplePpj():
     with open(fname, 'r') as config:
         input_lines = config.read()
 
-    enka = Enka(input_lines.split(GLA.LINE_SEPARATOR), 0)
+    enka = Enka(input_lines.split(constants.LINE_SEPARATOR), 0)
     enka.restart_from_pos(0)
     enka.feed_next_character("'")
     enka.feed_next_character("'")
