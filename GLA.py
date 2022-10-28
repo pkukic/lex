@@ -12,7 +12,7 @@ def generate_eNKA_tables(beginning_state: str):
         os.mkdir(working_dir)
     
     with open(os.path.join(working_dir, "akcije.txt"), 'w+') as actions:
-        actions.write(beginning_state + LINE_SEPARATOR)
+        actions.write("<" + beginning_state + ">" + LINE_SEPARATOR)
         with open(TARGET, 'r') as file:
             n = 0
             state = ""

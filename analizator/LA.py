@@ -161,8 +161,6 @@ class Lex:
         while self.current_pos < self.length_of_input:
             c = input_string[self.current_pos]
             self.__feed_character_to_active_enkas(c)
-            # if self.current_pos % 100 == 0:
-            #     print(self.current_pos, c)
             if self.__check_if_all_enkas_terminated():
                 enka_name, enka = self.__pick_highest_priority_enka()
                 furthest_pos = enka.get_furthest_pos()
@@ -187,33 +185,10 @@ class Lex:
 
 
 def main():
-    # dir = '../integration_tests/'
-    # dir_names = [os.path.abspath(os.path.join(dir, name))[:-3] for name in os.listdir(dir) if name.endswith('.in')]
-
-    # for i, dir_name in enumerate(dir_names):
-    #     print(dir_name)
-    #     tablice_dir_name = os.path.join(dir_name, 'tablice/')
-    #     lex = Lex(tablice_dir_name)
-    #     computed = ''
-    #     output = ''
-    #     with open(dir_name + '.in') as input_file:
-    #         lex.compute_from_string(input_file.read())
-    #         computed = lex.output_as_string()
-    #     print(computed)
-    #     print("----------------------")
-    #     with open(dir_name + '.out') as output_file:
-    #         output = output_file.read()
-    #     print(output)
-    #     print("----------------------")
-
-    #     assert output == computed
-
-    #     print(f"Passed tests: {i}")
-    
     current_dir = os.path.dirname(os.path.realpath(__file__))
     tablice_dir = os.path.join(current_dir, 'tablice')
     lex = Lex(tablice_dir)
-    input = ''.join(sys.stdin.readlines())
+    input = sys.stdin.read()
     lex.compute_from_string(input)
     computed = lex.output_as_string()
     print(computed)
