@@ -1,0 +1,10 @@
+[project]
+name = "lex"
+version = "0.1.0"
+description = "Lexical analyzer generator (simplified clone of lex) for a homework in Compiler Design at FER"
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = []
+
+[tool.uv]
+dev-dependencies = []
